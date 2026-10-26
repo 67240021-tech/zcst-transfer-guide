@@ -21,11 +21,12 @@
   const allowed=C.comparable(p,m);
   return `<table class="year-comparison" aria-label="${esc(m.name)}两年分数排位对照"><thead><tr><th scope="col">指标</th><th scope="col">2025<span>录取</span></th><th scope="col">2026<span>投档</span></th><th scope="col">数值变化</th></tr></thead><tbody>${rows.map(([name,key])=>`<tr><th scope="row">${name}</th><td>${val(p?.[key])}</td><td>${val(m[key])}</td><td class="delta">${C.difference(p?.[key],m[key],allowed)}</td></tr>`).join('')}</tbody></table>`;
  }
- function requirements(m){return `<details class="major-fold requirements"><summary>报考要求</summary><div class="requirements-body"><p class="requirements-year">以下为2026年资料</p><p><b>考试科目：</b>${(m.subjects||[]).map(esc).join('、')||'暂无'}</p><p><b>专业限制：</b>${esc(m.requirements||'暂无')}</p><p><b>学制：</b>${val(m.duration)}年　<b>学费：</b>${val(m.tuition)}元/年<br><b>住宿费：</b>${val(m.accommodation)}元/年</p>${m.books?`<p><b>参考书：</b>${esc(m.books)}</p>`:''}<div class="requirement-links">${m.outline?`<a href="${esc(m.outline)}" target="_blank" rel="noopener">查看考试大纲 ↗</a>`:''}<a href="${esc(sources.prerequisite2026.url)}" target="_blank" rel="noopener">前置专业要求公告 ↗</a></div><p class="muted">前置专业是否符合，以学校审核为准。</p></div></details>`}
+ function outlineHref(m){const i=D.outlines.findIndex(o=>o.url===m.outline);return i<0?'':`outline.html?id=${String(i+1).padStart(2,'0')}&major=${encodeURIComponent(m.id)}`}
+ function requirements(m){const reader=outlineHref(m);return `<details class="major-fold requirements" id="requirements-${m.id}"><summary>报考要求<span>科目 · 限制 · 费用</span></summary><div class="requirements-body"><p class="requirements-year">2026年报考信息</p><section class="requirement-block"><h3>考试科目</h3><div class="exam-subjects">${(m.subjects||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></section><section class="requirement-block"><h3>专业限制</h3><p>${esc(m.requirements||'暂无')}</p></section><section class="requirement-block"><h3>学制与费用</h3><div class="fee-grid"><div><small>学制</small><b>${val(m.duration)}<em>年</em></b></div><div><small>学费 / 年</small><b>${val(m.tuition)}<em>元</em></b></div><div><small>住宿费 / 年</small><b>${val(m.accommodation)}<em>元</em></b></div></div></section>${reader?`<a class="outline-read" href="${esc(reader)}"><span>在线阅读考试大纲<small>手机直接打开，无需下载</small></span><span aria-hidden="true">→</span></a>`:''}${m.books?`<section class="requirement-block book-block"><h3>参考书目</h3><p>${esc(m.books)}</p></section>`:''}<p class="requirement-footnote">前置专业是否符合，以学校审核为准。<a href="${esc(sources.prerequisite2026.url)}" target="_blank" rel="noopener">查看具体要求 ↗</a></p></div></details>`}
  function card(m){
   const p=C.previous(D.records,m),veteran=m.batch==='退役士兵批',music=!!p&&p.name!==m.name;
-  const figures=veteran?`<div class="veteran-plan"><span>2026年招生计划</span><strong>${val(m.plan)}<small>人</small></strong></div>`:`${music?`<p class="music-note">2025为${esc(p.name)}整体；2026为本方向，不计算差值。</p>`:''}${comparisonTable(m,p,[['最低分','minScore'],['最低排位','worstRank']])}<div class="admission-counts"><span>2025录取 <b>${val(p?.admitted)}</b> 人${music?'（专业整体）':''}</span><span>2026计划 <b>${val(m.plan)}</b> 人 · 投档 <b>${val(m.filed)}</b> 人</span></div><details class="major-fold"><summary>更多分数数据</summary>${comparisonTable(m,p,[['最高分','maxScore'],['最高排位','bestRank']])}</details>`;
-  return `<article class="major-card" id="major-${m.id}" data-major="${m.id}" tabindex="-1"><div class="compact-title"><h2>${esc(m.name)}</h2><span class="badge ${m.examType==='校考'?'school':''}">${esc(m.examType)}</span></div><p class="subline">${esc(m.batch)} · 专业号 ${esc(m.code)}</p>${figures}${requirements(m)}<div class="major-share"><button data-share="${m.id}" aria-label="分享${esc(m.name)}">分享专业 ↗</button></div></article>`;
+  const figures=veteran?`<div class="veteran-plan"><span>2026年招生计划</span><strong>${val(m.plan)}<small>人</small></strong></div>`:`${music?`<p class="music-note">2025为${esc(p.name)}整体；2026为本方向，不计算差值。</p>`:''}${comparisonTable(m,p,[['最低分','minScore'],['最低排位','worstRank']])}<div class="admission-counts"><span>2025录取 <b>${val(p?.admitted)}</b> 人${music?'（专业整体）':''}</span><span>2026计划 <b>${val(m.plan)}</b> 人 · 投档 <b>${val(m.filed)}</b> 人</span></div>`;
+  return `<article class="major-card" id="major-${m.id}" data-major="${m.id}" tabindex="-1"><div class="compact-title"><h2><button class="major-title-toggle" data-toggle-requirements="${m.id}" aria-expanded="false" aria-controls="requirements-${m.id}">${esc(m.name)}</button></h2><span class="badge ${m.examType==='校考'?'school':''}">${esc(m.examType)}</span></div><p class="subline">${esc(m.batch)} · 专业号 ${esc(m.code)}</p>${figures}${requirements(m)}<div class="major-share"><button data-share="${m.id}" aria-label="分享${esc(m.name)}">分享专业 ↗</button></div></article>`;
  }
  function render(){
   const batch=$('#batch').value,q=$('#search').value.trim().toLowerCase(),exam=$('#exam').value;
@@ -47,19 +48,11 @@
  $('#browseAll').onclick=()=>{$('#search').value='';browsing=true;visibleLimit=12;render()};
  $('#loadMore').onclick=()=>{visibleLimit+=12;render()};
  $('#categories').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(b){category=b.dataset.category;browsing=true;visibleLimit=12;render()}});
- $('#results').addEventListener('click',e=>{const b=e.target.closest('[data-share]');if(b)share(b.dataset.share);if(e.target.id==='emptyReset')reset()});
+ $('#results').addEventListener('click',e=>{const b=e.target.closest('[data-share]');if(b)share(b.dataset.share);const t=e.target.closest('[data-toggle-requirements]');if(t){const d=document.getElementById('requirements-'+t.dataset.toggleRequirements);d.open=!d.open}if(e.target.id==='emptyReset')reset()});
+ $('#results').addEventListener('toggle',e=>{if(!e.target.matches('.requirements'))return;const card=e.target.closest('.major-card'),button=card.querySelector('.major-title-toggle');button.setAttribute('aria-expanded',String(e.target.open))},true);
  function share(id){const u=new URL(location.href);u.search='';u.searchParams.set('major',id);u.hash='majors';$('#shareUrl').value=u.href;$('#copyStatus').textContent='';showDialog($('#shareDialog'))}
  $('#copyBtn').addEventListener('click',async()=>{const input=$('#shareUrl');try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(input.value)}else{input.focus();input.select();if(!document.execCommand('copy'))throw Error('copy')}$('#copyStatus').textContent='链接已复制，可粘贴到微信。'}catch{$('#copyStatus').textContent='请长按链接手动复制。';input.focus();input.select()}});
  $$('[data-close]').forEach(b=>b.onclick=()=>closeDialog(b.closest('dialog')));$$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeDialog(d)}}));
- function download(content,name,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
- $('#exportBtn').onclick=()=>{
-  if(!shown.length){toast('当前没有可导出的结果');return}
-  const records=[...new Map(shown.flatMap(m=>[C.previous(D.records,m),m]).filter(Boolean).map(m=>[m.id,m])).values()];
-  const keys=['year','batch','code','name','plan','filed','admitted','maxScore','minScore','bestRank','worstRank','examType'],header=['年份','批次','专业号','专业名称','计划人数','投档人数','录取人数','最高分','最低分','最高排位','最低排位','考试类型'];
-  const csv=[header,...records.map(m=>keys.map(k=>m[k]??''))].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
-  download('\ufeff'+csv,'珠科专升本-两年查询结果.csv','text/csv;charset=utf-8');toast('已生成CSV；微信不能下载时，可在浏览器打开后导出。');
- };
- $('#presentBtn').onclick=()=>{const on=document.body.classList.toggle('presentation');$('#presentBtn').textContent=on?'退出展示':'展示模式'};
  document.addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)&&!$('dialog[open]')){e.preventDefault();location.hash='majors';$('#search').focus()}});
  const form=$('#checkForm');
  function field(name,title,options){return `<label>${title}<select name="${name}" required><option value="">请选择</option>${options.map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select></label>`}
@@ -87,7 +80,7 @@
    if(targets.length){
     if(location.hash!=='#majors'){history.replaceState(null,'',location.pathname+location.search+'#majors');navigate()}
     $('#batch').value=original.batch;$('#search').value=original.name;render();
-    requestAnimationFrame(()=>{const target=document.getElementById('major-'+targets[0].id);if(target){target.classList.add('shared-target');target.focus({preventScroll:true});target.scrollIntoView({block:'start'})}});
+    requestAnimationFrame(()=>{const target=document.getElementById('major-'+targets[0].id);if(target){target.classList.add('shared-target');if(new URLSearchParams(location.search).get('showRequirements')==='1')target.querySelector('.requirements').open=true;target.focus({preventScroll:true});target.scrollIntoView({block:'start'})}});
    }
   }else toast('该专业链接暂未收录，请输入专业名称查找。');
  }
