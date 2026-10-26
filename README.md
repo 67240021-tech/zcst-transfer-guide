@@ -16,13 +16,13 @@
 
 ## 数据口径
 
-143条年份、批次、专业记录：2026普通批53条，2025普通批45条，2026退役士兵批45条。43个名称和考试类型一致的普通批专业显示公布数值差（2026减2025）。2025音乐专业按整体公布、2026细分方向，仅并列展示，不计算差值。不同年份的分数或排位差不等价于录取难度变化。
+199条年份、批次、专业记录：2026普通批53条、退役士兵批45条；2025普通批45条、退役士兵批45条、建档立卡批11条。2025计划分别合计1768、300、32人。43个名称和考试类型一致的普通批专业显示公布数值差（2026减2025）。2025音乐专业按整体公布、2026细分方向，仅并列展示，不计算差值。不同年份的分数或排位差不等价于录取难度变化。
 
-计划、投档人数、录取人数分别保留，不互相代填。缺失值保留null、页面显示“—”。2026普通批缺最终录取人数；音乐表演（管乐）缺投档结果；退役批仅有2026计划。无2027资格政策。原始来源及图片仍保存在数据文件和仓库供维护核验。
+计划、投档人数、录取人数分别保留，不互相代填。缺失值保留null、页面显示“—”。2026普通批缺最终录取人数；音乐表演（管乐）缺投档结果；退役批可比较2025与2026计划；建档立卡批仅有2025计划。无2027资格政策。原始来源及图片仍保存在数据文件和仓库供维护核验。
 
 ## 文件与更新
 
-仓库根目录直接用于GitHub Pages。index.html、style.css、app.js负责界面，comparison.js负责两年配对与差值，eligibility.js负责2026资格规则。data.js是网页读取的数据，data.json和招生数据.csv为配套资料。原始图片source-1.png至source-9.png及source-integrity.json保留。
+仓库根目录直接用于GitHub Pages。index.html、style.css、app.js负责界面，comparison.js负责两年配对与差值，eligibility.js负责2026资格规则。data.js是网页读取的数据，data.json和招生数据.csv为配套资料。原始图片source-1.png至source-12.png及source-integrity.json保留。
 
 修改后上传到main分支根目录，保持Settings → Pages为main / (root)。界面文件须同步更新并调整入口中的版本参数。更新数据时同步data.js、data.json与CSV，保留历史年度。
 
@@ -32,6 +32,6 @@ GitHub Pages使用免费公开仓库及github.io域名。手机浏览器布局�
 
 ## 本地工程维护
 
-完整页面在dist/；GitHub发布文件/为线上根目录的平铺副本，入口favicon路径不同。修改界面文件时同步两处；outline.html、outline-reader.js、outline-data.js为站内大纲阅读页。build_data.py生成原始数据；更新数据后将assets/source-路径映射为线上source-路径。
+完整页面在dist/；GitHub发布文件/为线上根目录的平铺副本，入口favicon路径不同。修改界面文件时同步两处；outline.html、outline-reader.js、outline-data.js为站内大纲阅读页。build_data.py生成数据，并调用merge_2025_plans.py合并用户提供的2025计划；更新数据后将assets/source-路径映射为线上source-路径。
 
 运行verify.mjs、verify-comparison.mjs和verify-outline-reader.mjs验证资格、数据口径、两年配对与大纲映射。build_outline_reader.py从大纲原文件/生成阅读数据，并在大纲核验/记录原文完整性。浏览器验收见浏览器验收记录.md。implement_mobile_reader.py、implement_comparison.py与redesign.py是单次迁移脚本，不要重复运行。

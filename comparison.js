@@ -2,11 +2,11 @@
 (function(root){
  'use strict';
  function previous(records,current){
-  if(current.batch!=='普通批')return null;
+  if(current.year!==2026)return null;
   return records.find(r=>r.year===2025&&r.batch===current.batch&&r.name===current.name)
    ||records.find(r=>r.year===2025&&r.batch===current.batch&&r.baseName===current.baseName)||null;
  }
- function comparable(previous,current){return !!previous&&current.batch==='普通批'&&previous.name===current.name&&previous.examType===current.examType}
+ function comparable(previous,current){return !!previous&&previous.batch===current.batch&&previous.name===current.name&&previous.examType===current.examType}
  function difference(before,after,allowed=true){
   if(!allowed||!Number.isFinite(before)||!Number.isFinite(after))return '—';
   const delta=after-before;return delta>0?'+'+delta:String(delta);

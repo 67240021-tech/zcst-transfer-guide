@@ -18,26 +18,26 @@
  function sourceLink(id){const s=sources[id];return s?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)} ↗</a>`:''}
  function renderCategories(){const cats=['','管理学','工学','经济学','医学','文学','教育学','艺术学','理学','法学'];$('#categories').innerHTML=cats.map(c=>`<button class="chip ${category===c?'active':''}" data-category="${c}" aria-pressed="${category===c}">${c||'全部门类'}</button>`).join('')}
  function comparisonTable(m,p,rows){
-  const allowed=C.comparable(p,m);
-  return `<table class="year-comparison" aria-label="${esc(m.name)}两年招生数据对照"><thead><tr><th scope="col">指标</th><th scope="col">2025年</th><th scope="col">2026年</th><th scope="col">数值变化</th></tr></thead><tbody>${rows.map(([name,key])=>`<tr><th scope="row">${name}</th><td>${val(p?.[key])}</td><td>${val(m[key])}</td><td class="delta">${C.difference(p?.[key],m[key],allowed)}</td></tr>`).join('')}</tbody></table>`;
+  const allowed=C.comparable(p,m),left=m.year===2025?m:p,right=m.year===2026?m:null;
+  return `<table class="year-comparison" aria-label="${esc(m.name)}两年招生数据对照"><thead><tr><th scope="col">指标</th><th scope="col">2025年</th><th scope="col">2026年</th><th scope="col">数值变化</th></tr></thead><tbody>${rows.map(([name,key])=>`<tr><th scope="row">${name}</th><td>${val(left?.[key])}</td><td>${val(right?.[key])}</td><td class="delta">${C.difference(left?.[key],right?.[key],allowed)}</td></tr>`).join('')}</tbody></table>`;
  }
  function outlineHref(m){const i=D.outlines.findIndex(o=>o.url===m.outline);return i<0?'':`outline.html?id=${String(i+1).padStart(2,'0')}&major=${encodeURIComponent(m.id)}`}
- function requirements(m){const reader=outlineHref(m);return `<details class="major-fold requirements" id="requirements-${m.id}"><summary>报考要求<span>2026年 · 科目、限制与费用</span></summary><div class="requirements-body"><dl class="requirement-list"><div><dt>考试科目</dt><dd>${esc((m.subjects||[]).join('、'))}</dd></div><div><dt>专业限制</dt><dd>${esc(m.requirements||'暂无')}</dd></div><div><dt>学制费用</dt><dd class="fees-inline"><span>学制 ${val(m.duration)} 年</span><span>学费 ${val(m.tuition)} 元/年</span><span>住宿费 ${val(m.accommodation)} 元/年</span></dd></div>${m.books?`<div><dt>参考书目</dt><dd class="books-inline">${esc(m.books)}</dd></div>`:''}</dl>${reader?`<a class="outline-read" href="${esc(reader)}"><span>在线阅读考试大纲<small>无需下载，手机直接阅读</small></span><span aria-hidden="true">→</span></a>`:''}<p class="requirement-footnote">前置专业是否符合，以学校审核为准。<a href="${esc(sources.prerequisite2026.url)}" target="_blank" rel="noopener">查看具体要求 ↗</a></p></div></details>`}
+ function requirements(m){if(m.year===2025)return `<details class="major-fold requirements" id="requirements-${m.id}"><summary>报考要求<span>2025年历史信息</span></summary><div class="requirements-body"><dl class="requirement-list"><div><dt>考试科目</dt><dd>${esc((m.subjects||[]).join('、'))}</dd></div><div><dt>专业限制</dt><dd>${esc(m.requirements||'暂无资料')}</dd></div><div><dt>学制</dt><dd>${val(m.duration)} 年</dd></div></dl><p class="requirement-footnote">仅展示2025年该批次资料；未提供费用及2026年计划，不作为当年报考资格结论。</p></div></details>`;const reader=outlineHref(m);return `<details class="major-fold requirements" id="requirements-${m.id}"><summary>报考要求<span>2026年 · 科目、限制与费用</span></summary><div class="requirements-body"><dl class="requirement-list"><div><dt>考试科目</dt><dd>${esc((m.subjects||[]).join('、'))}</dd></div><div><dt>专业限制</dt><dd>${esc(m.requirements||'暂无')}</dd></div><div><dt>学制费用</dt><dd class="fees-inline"><span>学制 ${val(m.duration)} 年</span><span>学费 ${val(m.tuition)} 元/年</span><span>住宿费 ${val(m.accommodation)} 元/年</span></dd></div>${m.books?`<div><dt>参考书目</dt><dd class="books-inline">${esc(m.books)}</dd></div>`:''}</dl>${reader?`<a class="outline-read" href="${esc(reader)}"><span>在线阅读考试大纲<small>无需下载，手机直接阅读</small></span><span aria-hidden="true">→</span></a>`:''}<p class="requirement-footnote">前置专业是否符合，以学校审核为准。<a href="${esc(sources.prerequisite2026.url)}" target="_blank" rel="noopener">查看具体要求 ↗</a></p></div></details>`}
 
  function card(m){
   const p=C.previous(D.records,m),veteran=m.batch==='退役士兵批',music=!!p&&p.name!==m.name;
-  const figures=veteran?`<div class="veteran-plan"><span>2026年招生计划</span><strong>${val(m.plan)}<small>人</small></strong></div>`:`${music?`<p class="music-note">2025为${esc(p.name)}整体；2026为本方向，不计算差值。</p>`:''}${comparisonTable(m,p,[['最低分','minScore'],['最低排位','worstRank'],['招生计划（人）','plan'],['录取人数（人）','admitted'],['投档人数（人）','filed']])}`;
+  const figures=(veteran||m.batch==='建档立卡批')?comparisonTable(m,p,[['招生计划（人）','plan']]):`${music?`<p class="music-note">2025为${esc(p.name)}整体；2026为本方向，不计算差值。</p>`:''}${comparisonTable(m,p,[['最低分','minScore'],['最低排位','worstRank'],['招生计划（人）','plan'],['录取人数（人）','admitted'],['投档人数（人）','filed']])}`;
   return `<article class="major-card" id="major-${m.id}" data-major="${m.id}" tabindex="-1"><div class="compact-title"><h2><button class="major-title-toggle" data-toggle-requirements="${m.id}" aria-expanded="false" aria-controls="requirements-${m.id}">${esc(m.name)}</button></h2><span class="badge ${m.examType==='校考'?'school':''}">${esc(m.examType)}</span></div><p class="subline">${esc(m.batch)} · 专业号 ${esc(m.code)}</p>${figures}${requirements(m)}<div class="major-share"><button data-share="${m.id}" aria-label="分享${esc(m.name)}">分享专业 ↗</button></div></article>`;
  }
  function render(){
   const batch=$('#batch').value,q=$('#search').value.trim().toLowerCase(),exam=$('#exam').value;
-  shown=D.records.filter(m=>m.year===2026&&m.batch===batch&&(!category||m.category===category)&&(!exam||m.examType===exam)&&(!q||[m.name,m.code].join(' ').toLowerCase().includes(q)));
+  shown=D.records.filter(m=>m.year===(batch==='建档立卡批'?2025:2026)&&m.batch===batch&&(!category||m.category===category)&&(!exam||m.examType===exam)&&(!q||[m.name,m.code].join(' ').toLowerCase().includes(q)));
   if($('#sort').value==='min')shown.sort((a,b)=>(a.minScore??Infinity)-(b.minScore??Infinity));
   if($('#sort').value==='plan')shown.sort((a,b)=>(b.plan??-1)-(a.plan??-1));
   const active=!!q||browsing;
   $('#resultSection').hidden=!active;$('#searchStart').hidden=active;$('#loadMore').hidden=!active||shown.length<=visibleLimit;
   $('#resultCount').innerHTML=`找到 <b>${shown.length}</b> 个专业${batch==='普通批'?'及方向':''}`;
-  $('#batchNote').textContent=batch==='退役士兵批'?'仅有2026年招生计划，暂缺历年分数与录取数据。':'分数与排位：2025录取、2026投档；变化＝2026－2025。排位数值越小越靠前；跨年差值不代表录取难度。“—”表示暂无数据。';
+  $('#batchNote').textContent=batch==='退役士兵批'?'展示2025与2026年计划；变化＝2026－2025。暂无该批次投档与录取结果。':batch==='建档立卡批'?'仅收录2025年计划；2026年及录取结果暂缺，不与普通批混算。':'分数与排位：2025录取、2026投档；变化＝2026－2025。排位数值越小越靠前；跨年差值不代表录取难度。“—”表示暂无数据。';
   $('#results').innerHTML=!active?'':shown.length?shown.slice(0,visibleLimit).map(card).join(''):`<div class="empty-state"><h3>没有找到相关专业</h3><p>试试更短的专业名称，或调整批次和筛选条件。</p><button class="quiet" id="emptyReset">重新查找</button></div>`;
   renderCategories();
  }
@@ -77,7 +77,7 @@
  if(shared){
   const original=D.records.find(m=>m.id===shared);
   if(original){
-   const targets=D.records.filter(m=>m.year===2026&&m.batch===original.batch&&(m.name===original.name||(original.year===2025&&m.baseName===original.baseName)));
+   const targets=D.records.filter(m=>m.year===(original.batch==='建档立卡批'?2025:2026)&&m.batch===original.batch&&(m.name===original.name||(original.year===2025&&m.baseName===original.baseName)));
    if(targets.length){
     if(location.hash!=='#majors'){history.replaceState(null,'',location.pathname+location.search+'#majors');navigate()}
     $('#batch').value=original.batch;$('#search').value=original.name;render();
