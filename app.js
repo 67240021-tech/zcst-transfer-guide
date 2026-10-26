@@ -15,7 +15,7 @@
  function renderCategories(){const cats=['','管理学','工学','经济学','医学','文学','教育学','艺术学','理学','法学'];$('#categories').innerHTML=cats.map(c=>`<button class="chip ${category===c?'active':''}" data-category="${c}" aria-pressed="${category===c}">${c||'全部门类'}</button>`).join('')}
  function render(){
   const year=+$('#year').value,batch=$('#batch').value,q=$('#search').value.trim().toLowerCase(),exam=$('#exam').value;
-  shown=D.records.filter(m=>m.year===year&&m.batch===batch&&(!category||m.category===category)&&(!exam||m.examType===exam)&&(!q||[m.name,m.code,m.category,...(m.subjects||[])].join(' ').toLowerCase().includes(q)));
+  shown=D.records.filter(m=>m.year===year&&m.batch===batch&&(!category||m.category===category)&&(!exam||m.examType===exam)&&(!q||[m.name,m.code].join(' ').toLowerCase().includes(q)));
   if($('#sort').value==='min')shown.sort((a,b)=>(a.minScore??Infinity)-(b.minScore??Infinity));
   if($('#sort').value==='plan')shown.sort((a,b)=>(b.plan??-1)-(a.plan??-1));
   const active=!!q||browsing;
