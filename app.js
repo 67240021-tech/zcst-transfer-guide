@@ -50,6 +50,7 @@
  $('#categories').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(b){category=b.dataset.category;browsing=true;visibleLimit=12;render()}});
  $('#results').addEventListener('click',e=>{const b=e.target.closest('[data-share]');if(b)share(b.dataset.share);if(e.target.id==='emptyReset')reset()});
  function share(id){const u=new URL(location.href);u.search='';u.searchParams.set('major',id);u.hash='majors';$('#shareUrl').value=u.href;$('#copyStatus').textContent='';showDialog($('#shareDialog'))}
+ $('#openConsultation').addEventListener('click',()=>showDialog($('#consultationDialog')));
  $('#copyBtn').addEventListener('click',async()=>{const input=$('#shareUrl');try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(input.value)}else{input.focus();input.select();if(!document.execCommand('copy'))throw Error('copy')}$('#copyStatus').textContent='链接已复制，可粘贴到微信。'}catch{$('#copyStatus').textContent='请长按链接手动复制。';input.focus();input.select()}});
  $$('[data-close]').forEach(b=>b.onclick=()=>closeDialog(b.closest('dialog')));$$('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeDialog(d)}}));
  document.addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)&&!$('dialog[open]')){e.preventDefault();location.hash='majors';$('#search').focus()}});
