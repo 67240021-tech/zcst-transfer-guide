@@ -4,7 +4,7 @@
  const D=window.ZCST_DATA,$=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const val=v=>v==null?'—':esc(v), sources=Object.fromEntries(D.sources.map(x=>[x.id,x]));
- let category='',shown=[],toastTimer,browsing=false,visibleLimit=12;
+ let selectedYear=2027,category='',shown=[],toastTimer,browsing=false,visibleLimit=12;
  function toast(s){$('#toast').textContent=s;$('#toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').style.display='none',3000)}
  function showDialog(d){if(d.open)return;if(d.showModal)d.showModal();else d.setAttribute('open','')}
  function closeDialog(d){if(d.close)d.close();else d.removeAttribute('open')}
@@ -22,6 +22,11 @@
  function prerequisiteGuide(){return `<div class="prerequisite-guide"><strong>前置专业要求怎么查？</strong><p>打开珠海科技学院招生网 → “招生信息” → 找到2026年5月6日发布的《2026年普通专升本招生专业前置专业要求公布》，查看文内《2026年普通专升本招生专业前置专业要求.xls》，按拟报考的本科专业核对自己的专科专业。</p><a href="${esc(sources.prerequisite2026.url)}" target="_blank" rel="noopener">打开招生网前置专业要求公告 ↗</a><p class="requirement-footnote">若手机无法预览附件，可在浏览器打开或用电脑查看；是否符合以学校审核为准。</p></div>`}
  function requirements(m){if(m.year===2026&&m.batch==='建档立卡批')return `<section class="major-fold requirements" id="requirements-${m.id}"><h3>报考要求</h3><div class="requirements-body">本次表格仅提供该批次录取结果，计划、专业限制及费用请以学校该批次公告和审核为准。${prerequisiteGuide()}</div></section>`;const reader=outlineHref(m);return `<section class="major-fold requirements" id="requirements-${m.id}"><h3>报考要求</h3><div class="requirements-body"><dl class="requirement-list"><div><dt>考试科目</dt><dd>${esc((m.subjects||[]).join('、'))}</dd></div><div><dt>专业限制</dt><dd>${esc(m.requirements||'暂无')}</dd></div><div><dt>学制费用</dt><dd class="fees-inline"><span>学制 ${val(m.duration)} 年</span><span>学费 ${val(m.tuition)} 元/年</span><span>住宿费 ${val(m.accommodation)} 元/年</span></dd></div>${m.books?`<div><dt>参考书目</dt><dd class="books-inline">${esc(m.books)}</dd></div>`:''}</dl>${reader?`<a class="outline-read" href="${esc(reader)}"><span>在线阅读考试大纲<small>无需下载，手机直接阅读</small></span><span aria-hidden="true">→</span></a>`:''}${prerequisiteGuide()}</div></section>`}
 
+ function proposalCard(m){
+  const historical=D.records.some(r=>r.year===2026&&r.batch==='普通批'&&(r.baseName===m.name||r.name===m.name));
+  return `<article class="major-card proposal-card" id="major-${m.id}" data-major="${m.id}" tabindex="-1"><div class="compact-title"><h2>${esc(m.name)}</h2><span class="badge proposal-badge">2027拟招生</span></div><p class="subline">${esc(m.college)}</p><dl class="admission-metrics"><div class="metric-count"><dt>学院拟计划（人）</dt><dd>${val(m.plan)}</dd></div><div class="metric-count"><dt>综合课考试形式</dt><dd class="exam-kind">${esc(m.examType)}</dd></div></dl><section class="requirements"><h3>2027前置专业要求（拟）</h3><div class="requirements-body proposal-requirements">${esc(m.requirements)}</div></section><p class="count-note">本表未提供2027考试科目、大纲及收费，待正式简章公布。</p><div class="proposal-actions">${historical?`<button type="button" data-history="${esc(m.name)}">查看2026录取参考 →</button>`:'<span>暂无对应2026年录取参考</span>'}<button type="button" data-share="${m.id}" aria-label="分享${esc(m.name)}">分享专业 ↗</button></div></article>`;
+ }
+ function setYear(year){selectedYear=Number(year);category='';$('#exam').value='';$('#sort').value='code';visibleLimit=12;render()}
  function card(m){
   const figures=figures2026(m);
   return `<article class="major-card" id="major-${m.id}" data-major="${m.id}" tabindex="-1"><div class="compact-title"><h2>${esc(m.name)}</h2><span class="badge ${m.examType==='校考'?'school':''}">${esc(m.examType)}</span></div><p class="subline">${esc(m.batch)} · 专业号 ${esc(m.code)}</p>${figures}${m.previousName?`<p class="count-note">该方向录取已单列；2026计划仍为音乐表演专业整体计划。</p>`:""}${requirements(m)}<div class="major-share"><button data-share="${m.id}" aria-label="分享${esc(m.name)}">分享专业 ↗</button></div></article>`;
@@ -29,17 +34,25 @@
  function render(){
   const batch=$('#batch').value,q=$('#search').value.trim().toLowerCase(),exam=$('#exam').value;
   $$('[data-batch]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.batch===batch)));
-  shown=D.records.filter(m=>m.year===2026&&m.batch===batch&&(!category||m.category===category)&&(!exam||m.examType===exam)&&(!q||[m.name,m.code].join(' ').toLowerCase().includes(q)));
+  const proposed=selectedYear===2027;
+  $$('[data-year]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.year)===selectedYear)));
+  $('.primary-filters').hidden=proposed;$('#categories').hidden=proposed;$('#scoreSort').disabled=proposed;
+  $('#exam option[value="综合考查"]').disabled=proposed;
+  $('#examLabel').textContent=proposed?'综合课考试形式':'考试类型';
+  $('.query-notice').textContent=proposed?'2027学院拟招生：54个专业，拟计划3405人；未分批次，最终以正式公布为准。':'2026年录取参考 · 不能作为2027录取承诺';
+  $('#searchStart').textContent=proposed?'输入专业名称，查看2027拟计划、考试形式和前置要求。':'输入专业名称，查看2026年计划、录取人数、分数和排位。';
+  shown=proposed?D.proposals2027.records.filter(m=>(!exam||(m.examType==='省统考'?'统考':m.examType)===exam)&&(!q||m.name.toLowerCase().includes(q))):D.records.filter(m=>m.year===2026&&m.batch===batch&&(!category||m.category===category)&&(!exam||m.examType===exam)&&(!q||[m.name,m.code].join(' ').toLowerCase().includes(q)));
   if($('#sort').value==='min')shown.sort((a,b)=>(a.minScore??Infinity)-(b.minScore??Infinity));
   if($('#sort').value==='plan')shown.sort((a,b)=>(b.plan??-1)-(a.plan??-1));
   const active=!!q||browsing;
   $('#resultSection').hidden=!active;$('#searchStart').hidden=active;$('#loadMore').hidden=!active||shown.length<=visibleLimit;
-  $('#resultCount').innerHTML=`找到 <b>${shown.length}</b> 个专业${batch==='普通批'?'及方向':''}`;
-  $('#batchNote').textContent='2026年录取数据；招生计划与录取人数分别列示。“—”表示资料未列。';
-  $('#results').innerHTML=!active?'':shown.length?shown.slice(0,visibleLimit).map(card).join(''):`<div class="empty-state"><h3>没有找到相关专业</h3><p>试试更短的专业名称，或调整批次和筛选条件。</p><button class="quiet" id="emptyReset">重新查找</button></div>`;
+  $('#resultCount').innerHTML=`找到 <b>${shown.length}</b> 个专业${!proposed&&batch==='普通批'?'及方向':''}`;
+  $('#batchNote').textContent=proposed?'专业、学院拟计划、考试形式和前置要求均为2027拟方案。':'2026年录取数据；招生计划与录取人数分别列示。“—”表示资料未列。';
+  $('#results').innerHTML=!active?'':shown.length?shown.slice(0,visibleLimit).map(proposed?proposalCard:card).join(''):`<div class="empty-state"><h3>没有找到相关专业</h3><p>试试更短的专业名称，或调整批次和筛选条件。</p><button class="quiet" id="emptyReset">重新查找</button></div>`;
   renderCategories();
  }
  function reset(){browsing=false;visibleLimit=12;category='';$('#search').value='';$('#batch').value='普通批';$('#exam').value='';$('#sort').value='code';render()}
+ $$('[data-year]').forEach(b=>b.addEventListener('click',()=>setYear(b.dataset.year)));
  $$('[data-batch]').forEach(b=>b.addEventListener('click',()=>{$('#batch').value=b.dataset.batch;visibleLimit=12;browsing=true;render()}));
  ['batch','exam','sort'].forEach(s=>$('#'+s).addEventListener('change',()=>{visibleLimit=12;if(s==='exam')browsing=true;render()}));
  $('#search').addEventListener('input',()=>{visibleLimit=12;browsing=false;render()});$('#reset').addEventListener('click',reset);
@@ -48,7 +61,7 @@
  $('#browseAll').onclick=()=>{$('#search').value='';browsing=true;visibleLimit=12;render()};
  $('#loadMore').onclick=()=>{visibleLimit+=12;render()};
  $('#categories').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(b){category=b.dataset.category;browsing=true;visibleLimit=12;render()}});
- $('#results').addEventListener('click',e=>{const b=e.target.closest('[data-share]');if(b)share(b.dataset.share);if(e.target.id==='emptyReset')reset()});
+ $('#results').addEventListener('click',e=>{const b=e.target.closest('[data-share]');if(b)share(b.dataset.share);const h=e.target.closest('[data-history]');if(h){$('#search').value=h.dataset.history;$('#batch').value='普通批';browsing=true;setYear(2026);$('#resultSection').scrollIntoView({behavior:'smooth',block:'start'})}if(e.target.id==='emptyReset')reset()});
  function share(id){const u=new URL(location.href);u.search='';u.searchParams.set('major',id);u.hash='majors';$('#shareUrl').value=u.href;$('#copyStatus').textContent='';showDialog($('#shareDialog'))}
  $('#openConsultation').addEventListener('click',()=>showDialog($('#consultationDialog')));
  $('#copyBtn').addEventListener('click',async()=>{const input=$('#shareUrl');try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(input.value)}else{input.focus();input.select();if(!document.execCommand('copy'))throw Error('copy')}$('#copyStatus').textContent='链接已复制，可粘贴到微信。'}catch{$('#copyStatus').textContent='请长按链接手动复制。';input.focus();input.select()}});
@@ -74,14 +87,12 @@
  render();
  const shared=new URLSearchParams(location.search).get('major');
  if(shared){
-  const original=D.records.find(m=>m.id===shared);
+  const original=[...D.records,...D.proposals2027.records].find(m=>m.id===shared);
   if(original){
-   const targets=D.records.filter(m=>m.year===2026&&m.batch===original.batch&&m.name===original.name);
-   if(targets.length){
+    selectedYear=original.year;
     if(location.hash!=='#majors'){history.replaceState(null,'',location.pathname+location.search+'#majors');navigate()}
-    $('#batch').value=original.batch;$('#search').value=original.name;render();
-    requestAnimationFrame(()=>{const target=document.getElementById('major-'+targets[0].id);if(target){target.classList.add('shared-target');target.focus({preventScroll:true});target.scrollIntoView({block:'start'})}});
-   }
+    $('#batch').value=original.batch||'普通批';$('#search').value=original.name;render();
+    requestAnimationFrame(()=>{const target=document.getElementById('major-'+original.id);if(target){target.classList.add('shared-target');target.focus({preventScroll:true});target.scrollIntoView({block:'start'})}});
   }else toast('该专业链接暂未收录，请输入专业名称查找。');
  }
 })();
