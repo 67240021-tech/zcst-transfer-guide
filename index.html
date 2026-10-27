@@ -4,17 +4,17 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#307df0"><meta name="description" content="珠海科技学院普通专升本专业、招生计划、历年分数排位与报考条件查询。免费使用，无需登录。">
 <title>珠科专升本 · 招生信息查询</title>
-<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=20261027-10">
-<script defer src="data.js?v=20261027-10"></script><script defer src="eligibility.js"></script><script defer src="comparison.js?v=20261027-10"></script><script defer src="app.js?v=20261027-10"></script>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=20261027-11">
+<script defer src="data.js?v=20261027-11"></script><script defer src="eligibility.js"></script><script defer src="comparison.js?v=20261027-11"></script><script defer src="app.js?v=20261027-11"></script>
 </head>
 <body>
-<header class="header"><a class="brand" href="#majors"><img class="school-logo" src="school-logo.jpg" alt="珠海科技学院校徽" width="40" height="40"><span>珠海科技学院<small>普通专升本招生信息</small></span></a><nav aria-label="主导航"><a href="#majors" data-nav="majors">专业查询</a><a href="#eligibility" data-nav="eligibility">报考自查</a></nav></header>
+<header class="header"><a class="brand" href="#majors"><img class="school-logo" src="assets/school-logo.jpg" alt="珠海科技学院校徽" width="40" height="40"><span>珠海科技学院<small>普通专升本招生信息</small></span></a><nav aria-label="主导航"><a href="#majors" data-nav="majors">专业查询</a><a href="#eligibility" data-nav="eligibility">报考自查</a></nav></header>
 <main>
 <section id="majors" class="page">
 <h1 class="query-heading">专业分数与排位查询</h1>
 <section class="search-panel" aria-label="专业检索"><form id="searchForm" role="search"><label for="search" class="search-label">输入专业名称</label><div class="search-line"><div class="searchbox"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="如：护理、会计、金融" aria-label="输入专业名称" enterkeyhint="search" autocomplete="off"></div><button type="submit" class="button search-submit">查找</button></div></form>
 <div class="quick-search"><span>快捷查找</span><button data-query="护理学">护理学</button><button data-query="会计学">会计学</button><button data-query="英语">英语</button><button data-query="学前教育">学前教育</button><button data-query="电子商务">电子商务</button><button data-query="市场营销">市场营销</button><button data-query="工商管理">工商管理</button><button data-query="金融学">金融学</button><button data-query="旅游管理">旅游管理</button><button data-query="视觉传达设计">视觉传达设计</button></div>
-<div class="primary-filters"><label><span class="sr-only">招生批次</span><select id="batch"><option>普通批</option><option>退役士兵批</option><option>建档立卡批</option></select></label><button id="browseAll" class="text-button">浏览全部专业</button></div>
+<div class="primary-filters"><input id="batch" type="hidden" value="普通批"><div class="batch-buttons" role="group" aria-label="招生批次"><button type="button" data-batch="普通批" aria-pressed="true">普通批</button><button type="button" data-batch="退役士兵批" aria-pressed="false">退役士兵批</button><button type="button" data-batch="建档立卡批" aria-pressed="false">建档立卡批</button></div><button id="browseAll" class="text-button">浏览全部专业</button></div>
 <div class="advanced-filters" aria-label="专业筛选"><div class="filter-row"><label>考试类型<select id="exam"><option value="">全部类型</option><option>统考</option><option>校考</option><option>综合考查</option></select></label><label>排序<select id="sort"><option value="code">默认顺序</option><option value="min">2026最低分从低到高</option><option value="plan">计划人数从多到少</option></select></label><button id="reset" class="text-button">重置筛选</button></div><div id="categories" class="chips" aria-label="按学科门类筛选"></div></div>
 </section>
 <p class="query-notice">当前收录 2025—2026 年资料 · 2027 年政策待更新</p>

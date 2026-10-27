@@ -31,6 +31,7 @@
  }
  function render(){
   const batch=$('#batch').value,q=$('#search').value.trim().toLowerCase(),exam=$('#exam').value;
+  $$('[data-batch]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.batch===batch)));
   shown=D.records.filter(m=>(m.year===2026||(m.year===2025&&batch==='建档立卡批'&&!D.records.some(r=>r.year===2026&&r.batch===batch&&r.name===m.name)))&&m.batch===batch&&(!category||m.category===category)&&(!exam||m.examType===exam)&&(!q||[m.name,m.code].join(' ').toLowerCase().includes(q)));
   if($('#sort').value==='min')shown.sort((a,b)=>(a.minScore??Infinity)-(b.minScore??Infinity));
   if($('#sort').value==='plan')shown.sort((a,b)=>(b.plan??-1)-(a.plan??-1));
@@ -42,6 +43,7 @@
   renderCategories();
  }
  function reset(){browsing=false;visibleLimit=12;category='';$('#search').value='';$('#batch').value='普通批';$('#exam').value='';$('#sort').value='code';render()}
+ $$('[data-batch]').forEach(b=>b.addEventListener('click',()=>{$('#batch').value=b.dataset.batch;visibleLimit=12;browsing=true;render()}));
  ['batch','exam','sort'].forEach(s=>$('#'+s).addEventListener('change',()=>{visibleLimit=12;if(s==='exam')browsing=true;render()}));
  $('#search').addEventListener('input',()=>{visibleLimit=12;browsing=false;render()});$('#reset').addEventListener('click',reset);
  $('#searchForm').addEventListener('submit',e=>{e.preventDefault();if(!$('#search').value.trim()){toast('请输入专业名称，或点击“浏览全部专业”');$('#search').focus();return}visibleLimit=12;render();$('#search').blur();$('#resultSection').scrollIntoView({behavior:'smooth',block:'start'})});
